@@ -1,0 +1,11 @@
+pandas
+numpy
+seaborn
+matplotlib
+scikit-learn
+uvicorn
+fastapi
+streamlit 
+httpx
+pytest
+pytest-mock
