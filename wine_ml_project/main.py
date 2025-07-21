@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import joblib
 import numpy as np
@@ -8,8 +8,10 @@ import pandas as pd
 model = joblib.load('best_model.pkl') 
 scaler = joblib.load('scaler.pkl')   
 
+# Initialize FastAPI app
 app = FastAPI()
 
+# Define the input data model
 class WineFeatures(BaseModel):
     fixed_acidity: float
     volatile_acidity: float
@@ -25,36 +27,39 @@ class WineFeatures(BaseModel):
 
 @app.get("/")
 def home():
+    # Home endpoint with welcome message
     return {
         "message": "Welcome to the Wine Quality Prediction API! Use the /predict endpoint to predict wine quality."
     }
 
-
-# Define the prediction endpoint
+# Define the prediction endpoint    
 @app.post("/predict")
 def predict(wine: WineFeatures):
     # Extract the features from the incoming request
-    features = np.array([
-        [
-            wine.fixed_acidity,
-            wine.volatile_acidity,
-            wine.citric_acid,
-            wine.residual_sugar,
-            wine.chlorides,
-            wine.free_sulfur_dioxide,
-            wine.total_sulfur_dioxide,
-            wine.density,
-            wine.pH,
-            wine.sulphates,
-            wine.alcohol
-        ]
-    ])
-    
-    # Scale the input features using the saved scaler
-    scaled_features = scaler.transform(features)
+    try:
+        features = np.array([
+            [
+                wine.fixed_acidity,
+                wine.volatile_acidity,
+                wine.citric_acid,
+                wine.residual_sugar,
+                wine.chlorides,
+                wine.free_sulfur_dioxide,
+                wine.total_sulfur_dioxide,
+                wine.density,
+                wine.pH,
+                wine.sulphates,
+                wine.alcohol
+            ]
+        ])
+        # Scale the input features using the saved scaler
+        scaled_features = scaler.transform(features)
 
-    # Make the prediction using the loaded model
-    prediction = model.predict(scaled_features)
-    
-    # Return the prediction (wine quality)
-    return {"predicted_quality": str(prediction[0])}
+        # Make the prediction using the loaded model
+        prediction = model.predict(scaled_features)
+
+        # Return the prediction (wine quality)
+        return {"predicted_quality": str(prediction[0])}
+    except Exception as e:
+        # Handle errors during prediction
+        raise HTTPException(status_code=500, detail=f"Error during prediction: {str(e)}")
