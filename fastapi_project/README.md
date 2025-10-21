@@ -1,121 +1,160 @@
-# FastAPI Docker App Example
+# FastAPI Docker Examples & Azure Deployment
 
-This repository demonstrates several simple FastAPI applications with Docker integration. The project contains multiple FastAPI app examples (`app.py`, `app_2.py`, `main.py`) and a Dockerfile for containerized deployment.
+A collection of minimal FastAPI application examples with Docker integration and comprehensive Azure Container Apps deployment guides. Perfect for learning FastAPI, Docker containerization, and cloud deployment workflows.
 
----
+## Features
 
-## 📦 Project Structure
+- **Multiple FastAPI examples** demonstrating different patterns and endpoints
+- **Docker support** with optimized Dockerfile
+- **Azure Container Apps deployment** with manual and CI/CD options
+- **GitHub Actions workflow** for automated deployment
+- **Production-ready configuration** with best practices
+
+## Prerequisites
+
+- Python 3.8+
+- Docker Desktop (for containerization)
+- Azure CLI (for Azure deployment)
+- Azure subscription (for cloud deployment)
+- GitHub account (for CI/CD)
+
+## Project Structure
 
 ```
-.
-├── app.py
-├── app_2.py
-├── main.py
-├── requirements.txt
-├── Dockerfile
+fastapi_project/
+├── app.py              # Full CRUD API example
+├── app_2.py            # Query parameters example
+├── main.py             # Minimal "Hello Docker" example
+├── requirements.txt    # Python dependencies
+├── Dockerfile          # Container configuration
+└── README.md           # This file
 ```
 
----
+## FastAPI Applications Overview
 
-## 🚀 FastAPI App Endpoints Overview
+### 1. app.py - Full CRUD Example
 
-### 1. `app.py`
+A complete REST API with CRUD operations:
 
-* **GET /** : Returns a welcome message.
-* **GET /items/** : Lists example items.
-* **POST /items/** : Creates an item (expects JSON `{ name, price }`).
-* **PUT /items/{item\_id}** : Updates an item by ID.
-* **DELETE /items/{item\_id}** : Deletes an item by ID.
+- **GET /** - Welcome message
+- **GET /items/** - List all items
+- **POST /items/** - Create new item (expects JSON `{ "name": "...", "price": ... }`)
+- **PUT /items/{item_id}** - Update item by ID
+- **DELETE /items/{item_id}** - Delete item by ID
 
-### 2. `app_2.py`
+### 2. app_2.py - Query Parameters Example
 
-* **GET /{name}** : Returns the name as a response parameter.
-* **GET /** : Returns name, age, and height as query params.
-* **POST /items** : Creates an item (expects JSON `{ name, price }`).
+Demonstrates path and query parameters:
 
-### 3. `main.py`
+- **GET /{name}** - Returns name as path parameter
+- **GET /** - Returns query parameters (name, age, height)
+- **POST /items** - Create item (expects JSON `{ "name": "...", "price": ... }`)
 
-* **GET /** : Simple test endpoint, returns: `{"message": "Hello, Docker!"}`.
+### 3. main.py - Minimal Example
 
----
+Simple Docker test endpoint:
 
-## 🐳 Dockerized Deployment
+- **GET /** - Returns `{"message": "Hello, Docker!"}`
 
-### 1. Build Docker Image
+## Installation & Setup
 
-```sh
+### 1. Local Development
+
+```bash
+# Navigate to project directory
+cd fastapi_project
+
+# Create virtual environment (recommended)
+python -m venv .venv
+
+# Activate virtual environment
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 2. Run Locally
+
+Run any of the example apps:
+
+```bash
+# Run app.py
+uvicorn app:app --reload
+
+# OR run app_2.py
+uvicorn app_2:app --reload
+
+# OR run main.py
+uvicorn main:app --reload
+```
+
+Access the API at:
+- Application: [http://localhost:8000](http://localhost:8000)
+- Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- ReDoc: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+## Docker Deployment
+
+### Build Docker Image
+
+```bash
 docker build -t fastapimlproject .
 ```
 
-### 2. Run Docker Container
+### Run Docker Container
 
-```sh
+```bash
 docker run -d -p 8000:8000 fastapimlproject
 ```
 
----
+Access the application at [http://localhost:8000](http://localhost:8000)
 
-## 📄 requirements.txt
+### Stop Container
 
+```bash
+# List running containers
+docker ps
+
+# Stop container
+docker stop <container_id>
 ```
-fastapi
-uvicorn
-```
 
----
+## Azure Container Apps Deployment
 
-## 🛠️ How to Use
+### Option 1: Manual Deployment (Azure CLI)
 
-1. **Install Dependencies Locally**
+#### Step 1: Build and Push to Azure Container Registry (ACR)
 
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-2. **Run Any App Example Locally**
-
-   ```sh
-   uvicorn app:app --reload
-   ```
-
-   Or replace `app` by `app_2` or `main` as needed.
-
-3. **Access the API**
-
-   * Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
-
----
-
-## 🚀 Deploy to Azure Container Apps
-
-### 1. Manual Deployment (Azure CLI)
-
-#### Build and Push Docker Image to Azure Container Registry (ACR)
-
-```sh
-# Build your Docker image locally
+```bash
+# Build your Docker image
 docker build -t testscore-predictor .
 
 # Tag the image for ACR
 docker tag testscore-predictor fastapimlproject.azurecr.io/testscore-predictor:v1
 
-# Login to your Azure Container Registry
+# Login to Azure Container Registry
 az acr login --name fastapimlproject
 
 # Push the image to ACR
 docker push fastapimlproject.azurecr.io/testscore-predictor:v1
 ```
 
-#### Deploy Image to Azure Container App
+#### Step 2: Create Container App Environment
 
-```sh
-# Create Azure Container App Environment (if needed)
+```bash
 az containerapp env create \
   --name fastapi-env \
   --resource-group myResourceGroup \
   --location eastus
+```
 
-# Deploy the Container App
+#### Step 3: Deploy Container App
+
+```bash
 az containerapp create \
   --name testscore-predictor-app \
   --resource-group myResourceGroup \
@@ -126,34 +165,45 @@ az containerapp create \
   --registry-server fastapimlproject.azurecr.io \
   --registry-username <ACR_USERNAME> \
   --registry-password <ACR_PASSWORD>
+```
 
-# Get the public URL of the app
+#### Step 4: Get Application URL
+
+```bash
 az containerapp show \
   --name testscore-predictor-app \
   --resource-group myResourceGroup \
   --query properties.configuration.ingress.fqdn
 ```
 
----
+### Option 2: CI/CD with GitHub Actions
 
-### 2. CI/CD Deployment with GitHub Actions
+Automate deployment using GitHub Actions workflow.
 
-You can automate the build, push, and deployment of your FastAPI project to Azure Container Apps using GitHub Actions.
+#### Prerequisites for CI/CD
 
-#### Prerequisites
+Set up the following GitHub Secrets in your repository:
 
-* Azure Container Registry (ACR) is created and accessible.
-* Azure Container App environment exists (see steps above).
-* The following **GitHub secrets** must be set:
+- `AZURE_CREDENTIALS` - Azure Service Principal JSON
+- `REGISTRY_USERNAME` - ACR username
+- `REGISTRY_PASSWORD` - ACR password
+- `REGISTRY_LOGIN_SERVER` - ACR login server (e.g., fastapimlproject.azurecr.io)
 
-  * `AZURE_CREDENTIALS`: Azure Service Principal JSON (see below)
-  * `REGISTRY_USERNAME`: ACR username
-  * `REGISTRY_PASSWORD`: ACR password
-  * `REGISTRY_LOGIN_SERVER`: ACR login server (e.g. fastapimlproject.azurecr.io)
+#### Create Azure Service Principal
 
-#### Example GitHub Actions Workflow
+```bash
+az ad sp create-for-rbac \
+  --name "github-actions-fastapi" \
+  --sdk-auth \
+  --role contributor \
+  --scopes /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCE_GROUP>
+```
 
-Create a file `.github/workflows/deploy-to-azure-containerapp.yml` in your repository:
+Copy the entire JSON output and save it as the `AZURE_CREDENTIALS` secret.
+
+#### GitHub Actions Workflow
+
+Create `.github/workflows/deploy-to-azure-containerapp.yml`:
 
 ```yaml
 name: Build & Deploy to Azure Container Apps
@@ -208,45 +258,81 @@ jobs:
             az containerapp update \
               --name $CONTAINER_APP_NAME \
               --resource-group $RESOURCE_GROUP \
-              --image $ACR_LOGIN_SERVER/$IMAGE_NAME:latest \
-              --environment $CONTAINER_APP_ENV \
-              --registry-server $ACR_LOGIN_SERVER \
-              --registry-username ${{ secrets.REGISTRY_USERNAME }} \
-              --registry-password ${{ secrets.REGISTRY_PASSWORD }} \
-              --cpu 1 --memory 1.0Gi \
-              --ingress external \
-              --target-port 8000 || \
+              --image $ACR_LOGIN_SERVER/$IMAGE_NAME:latest || \
             az containerapp create \
               --name $CONTAINER_APP_NAME \
               --resource-group $RESOURCE_GROUP \
               --environment $CONTAINER_APP_ENV \
               --image $ACR_LOGIN_SERVER/$IMAGE_NAME:latest \
               --registry-server $ACR_LOGIN_SERVER \
-              --registry-username ${{ secrets.REGISTRY_USERNAME }} \
-              --registry-password ${{ secrets.REGISTRY_PASSWORD }} \
               --cpu 1 --memory 1.0Gi \
               --ingress external \
               --target-port 8000
 ```
 
-#### Azure Service Principal JSON Example
+## Dependencies
 
-To create and retrieve the JSON for `AZURE_CREDENTIALS`:
+See [requirements.txt](requirements.txt):
 
-```sh
-az ad sp create-for-rbac --name "github-actions-fastapi" --sdk-auth
+```
+fastapi
+uvicorn
 ```
 
-Copy the entire output and save as the secret `AZURE_CREDENTIALS` in your repo settings.
-
----
-
-## Summary of Azure Deployment Flow
+## Azure Deployment Summary
 
 1. **Build & tag Docker image**
-2. **Push to ACR**
+2. **Push to Azure Container Registry (ACR)**
 3. **Create Azure Container App environment**
-4. \*\*Deploy the image using \*\*\`\`
-5. **Retrieve the external URL for your FastAPI app**
+4. **Deploy container app** from ACR image
+5. **Access via external URL** provided by Azure
 
----
+## Best Practices
+
+- Use virtual environments for local development
+- Store secrets in GitHub Secrets (never commit credentials)
+- Use ACR for private container images
+- Enable health checks in production
+- Monitor logs using Azure Portal or CLI
+- Scale resources based on traffic needs
+
+## Troubleshooting
+
+### Docker Issues
+
+```bash
+# View container logs
+docker logs <container_id>
+
+# Check running containers
+docker ps -a
+
+# Remove stopped containers
+docker container prune
+```
+
+### Azure Issues
+
+```bash
+# View container app logs
+az containerapp logs show \
+  --name testscore-predictor-app \
+  --resource-group myResourceGroup
+
+# Check container app status
+az containerapp show \
+  --name testscore-predictor-app \
+  --resource-group myResourceGroup
+```
+
+## License
+
+MIT License (or specify your license)
+
+## References
+
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [Docker Documentation](https://docs.docker.com/)
+- [Azure Container Apps Documentation](https://docs.microsoft.com/azure/container-apps/)
+- [GitHub Actions Documentation](https://docs.github.com/actions)
+- [Azure CLI Reference](https://docs.microsoft.com/cli/azure/)
