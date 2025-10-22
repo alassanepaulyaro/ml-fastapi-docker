@@ -20,11 +20,11 @@ An interactive Streamlit web application for predicting student test scores base
 
 ```
 ml_streamlit/
-├── streamlit.py                 # Streamlit web application
-├── linear_regression_model.pkl  # Trained ML model
-├── scaler.pkl                   # StandardScaler for input normalization
-├── requirements.txt             # Python dependencies
-└── README.md                    # This file
+â”œâ”€â”€ streamlit.py                 # Streamlit web application
+â”œâ”€â”€ linear_regression_model.pkl  # Trained ML model
+â”œâ”€â”€ scaler.pkl                   # StandardScaler for input normalization
+â”œâ”€â”€ requirements.txt             # Python dependencies
+â””â”€â”€ README.md                    # This file
 ```
 
 ## Installation & Setup
@@ -147,14 +147,14 @@ import numpy as np
 import pandas as pd
 
 # Custom title and icon
-st.set_page_config(page_title="Score Predictor", page_icon="📊")
+st.set_page_config(page_title="Score Predictor", page_icon="ðŸ“Š")
 
 # Load models
 model = joblib.load('linear_regression_model.pkl')
 scaler = joblib.load('scaler.pkl')
 
 # Custom header
-st.title("📚 Student Test Score Predictor")
+st.title("ðŸ“š Student Test Score Predictor")
 st.markdown("Predict your test score based on study hours")
 
 # Use slider instead of number input
@@ -246,7 +246,7 @@ if uploaded_file:
 ```python
 st.sidebar.title("Model Information")
 st.sidebar.metric("Model Type", "Linear Regression")
-st.sidebar.metric("R² Score", "0.85")
+st.sidebar.metric("RÂ² Score", "0.85")
 st.sidebar.metric("MSE", "15.2")
 ```
 
